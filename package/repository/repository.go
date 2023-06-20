@@ -10,7 +10,9 @@ type Authorization interface {
 	GetUser(username, password string) (todo.User, error)
 }
 
-type List interface{}
+type List interface {
+	Create(userId int, list todo.List) (int, error)
+}
 
 type Item interface{}
 
@@ -23,5 +25,6 @@ type Reposotory struct {
 func NewReposotory(db *sqlx.DB) *Reposotory {
 	return &Reposotory{
 		Authorization: NewAuthPostgres(db),
+		List:          NewListPostgres(db),
 	}
 }
