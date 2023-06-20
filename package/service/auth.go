@@ -6,20 +6,21 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/dgrijalva/jwt-go"
+	// "github.com/dgrijalva/jwt-go"
 	"github.com/f1xend/todo-app"
 	"github.com/f1xend/todo-app/package/repository"
+	"github.com/golang-jwt/jwt/v5"
 )
 
 const (
 	salt      = "hjqrhjqw124617ajfhajs"
-	secretKey = "my-secret-key"
 	tokenTTL  = 12 * time.Hour
+	secretKey = "my_new_secret_key"
 )
 
-type tokenClaims struct {
-	jwt.StandardClaims
-	UserId int `json:"User_id"`
+type TokenClaims struct {
+	UserId int `json:"user_id"`
+	jwt.RegisteredClaims
 }
 
 type AuthService struct {
@@ -42,39 +43,36 @@ func (s *AuthService) GenerateToken(username, password string) (string, error) {
 		return "", err
 	}
 
-	MySigningKey := []byte("AllYourBase")
-
-	token := jwt.NewWithClaims(jwt.SigningMethodES256, &tokenClaims{
-		jwt.StandardClaims{
-			ExpiresAt: time.Now().Add(tokenTTL).Unix(),
-			IssuedAt:  time.Now().Unix(),
-		},
+	claims := TokenClaims{
 		user.Id,
-	})
+		jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(tokenTTL)),
+			IssuedAt:  jwt.NewNumericDate(time.Now()),
+		},
+	}
 
-	return token.SignedString(MySigningKey)
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	ss, err := token.SignedString([]byte(secretKey))
+
+	return ss, err
 }
 
 func (s *AuthService) ParseToken(accessToken string) (int, error) {
-	MySigningKey := []byte("AllYourBase")
-
-	token, err := jwt.ParseWithClaims(accessToken, &tokenClaims{}, func(token *jwt.Token) (interface{}, error) {
+	token, err := jwt.ParseWithClaims(accessToken, &TokenClaims{}, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, errors.New("invalid signing method")
 		}
-
-		return MySigningKey, nil
+		return []byte(secretKey), nil
 	})
 	if err != nil {
 		return 0, err
 	}
 
-	claims, ok := token.Claims.(*tokenClaims)
-	if !ok {
+	if claims, ok := token.Claims.(*TokenClaims); !ok {
 		return 0, errors.New("token claims are not of type *tokenClaims")
+	} else {
+		return claims.UserId, nil
 	}
-
-	return claims.UserId, nil
 }
 
 func generatePasswordHash(password string) string {
