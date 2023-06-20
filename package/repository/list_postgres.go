@@ -52,3 +52,12 @@ func (r *ListPostgres) GetAll(userId int) ([]todo.List, error) {
 
 	return lists, err
 }
+
+func (r *ListPostgres) GetById(userId, id int) (todo.List, error) {
+	var list todo.List
+
+	query := fmt.Sprintf("SELECT l.id, t.title, t.description FROM %s l INNER JOIN %s ul on ul.id_list = l.id WHERE id_user = $1 AND ul.id_list = $2", todoListsTable, todoUserListTable)
+	err := r.db.Get(&list, query, userId, id)
+
+	return list, err
+}
