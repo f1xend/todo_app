@@ -15,10 +15,10 @@ type UserList struct {
 }
 
 type Item struct {
-	Id          int
-	Title       string
-	Description string
-	Done        bool
+	Id          int    `json:"id" db:"id"`
+	Title       string `json:"title" db:"title"`
+	Description string `json:"description" db:"description"`
+	Done        bool   `json:"done" db:"done"`
 }
 
 type ListItem struct {
