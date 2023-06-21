@@ -18,7 +18,9 @@ type List interface {
 	Update(userId, id int, input todo.UpdateListInput) error
 }
 
-type Item interface{}
+type Item interface {
+	Create(listId int, item todo.Item) (int, error)
+}
 
 type Reposotory struct {
 	Authorization
@@ -30,5 +32,6 @@ func NewReposotory(db *sqlx.DB) *Reposotory {
 	return &Reposotory{
 		Authorization: NewAuthPostgres(db),
 		List:          NewListPostgres(db),
+		Item:          NewItemPostgres(db),
 	}
 }
