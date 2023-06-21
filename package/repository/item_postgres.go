@@ -63,3 +63,12 @@ func (r *ItemPostgres) GetById(userId, itemId int) (todo.Item, error) {
 	}
 	return item, nil
 }
+
+func (r *ItemPostgres) Delete(userId, itemId int) error {
+	query := fmt.Sprintf(`DELETE FROM %s ti WHERE EXISTS (SELECT 1 FROM %s li WHERE li.id_item = ti.id AND EXISTS
+						(SELECT 1 FROM %s ul WHERE ul.id_list = li.id_list AND ul.id_user=$1)) AND ti.id=$2`,
+		itemTable, listItemsTable, usersListTable)
+
+	_, err := r.db.Exec(query, userId, itemId)
+	return err
+}

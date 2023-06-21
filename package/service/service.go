@@ -23,6 +23,7 @@ type Item interface {
 	Create(userId, listId int, item todo.Item) (int, error)
 	GetAll(userId, listId int) ([]todo.Item, error)
 	GetById(userId, itemId int) (todo.Item, error)
+	Delete(userId, itemId int) error
 }
 
 type Service struct {
