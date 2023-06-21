@@ -22,6 +22,7 @@ type List interface {
 type Item interface {
 	Create(userId, listId int, item todo.Item) (int, error)
 	GetAll(userId, listId int) ([]todo.Item, error)
+	GetById(userId, itemId int) (todo.Item, error)
 }
 
 type Service struct {

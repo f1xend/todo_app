@@ -21,6 +21,7 @@ type List interface {
 type Item interface {
 	Create(listId int, item todo.Item) (int, error)
 	GetAll(userId, listId int) ([]todo.Item, error)
+	GetById(userId, itemId int) (todo.Item, error)
 }
 
 type Reposotory struct {
