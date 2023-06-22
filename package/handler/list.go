@@ -91,7 +91,7 @@ func (h *Handler) updateList(c *gin.Context) {
 		return
 	}
 
-	if err := h.services.Update(userId, id, input); err != nil {
+	if err := h.services.List.Update(userId, id, input); err != nil {
 		newErrorResponce(c, http.StatusInternalServerError, err.Error())
 		return
 	}

@@ -23,6 +23,7 @@ type Item interface {
 	GetAll(userId, listId int) ([]todo.Item, error)
 	GetById(userId, itemId int) (todo.Item, error)
 	Delete(userId, itemId int) error
+	Update(userId, id int, input todo.UpdateItemInput) error
 }
 
 type Reposotory struct {

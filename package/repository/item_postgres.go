@@ -2,6 +2,7 @@ package repository
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/f1xend/todo-app"
 	"github.com/jmoiron/sqlx"
@@ -70,5 +71,42 @@ func (r *ItemPostgres) Delete(userId, itemId int) error {
 		itemTable, listItemsTable, usersListTable)
 
 	_, err := r.db.Exec(query, userId, itemId)
+	return err
+}
+
+func (r *ItemPostgres) Update(userId, itemId int, input todo.UpdateItemInput) error {
+	setValues := make([]string, 0)
+	args := make([]interface{}, 0)
+	argId := 1
+
+	if input.Title != nil {
+		setValues = append(setValues, fmt.Sprintf("title=$%d", argId))
+		args = append(args, *input.Title)
+		argId++
+	}
+
+	if input.Description != nil {
+		setValues = append(setValues, fmt.Sprintf("description=$%d", argId))
+		args = append(args, *input.Description)
+		argId++
+	}
+
+	if input.Done != nil {
+		setValues = append(setValues, fmt.Sprintf("Done=$%d", argId))
+		args = append(args, *input.Done)
+		argId++
+	}
+
+	setQuery := strings.Join(setValues, ", ")
+
+	query := fmt.Sprintf(`
+				UPDATE %s ti SET %s FROM %s li, %s ul
+				WHERE ti.id = li.id_item AND li.id_list = ul.id_list AND ul.id_user = $%d AND ti.id = $%d`,
+		itemTable, setQuery, listItemsTable, usersListTable, argId, argId+1)
+	args = append(args, userId, itemId)
+
+	fmt.Println(input, setQuery, query)
+
+	_, err := r.db.Exec(query, args...)
 	return err
 }
